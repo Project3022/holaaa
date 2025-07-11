@@ -48,24 +48,29 @@ document.addEventListener('DOMContentLoaded', () => {
       const div = document.createElement('div');
       div.classList.add('product-card', estadoClass);
       div.dataset.estado = estadoClass;
+      
+div.innerHTML = `
+  ${estadoClass === 'nuevo' || estadoClass === 'usado' ? `<span class="badge ${estadoClass}">${estadoClass.toUpperCase()}</span>` : ''}
+  <div class="contenido-producto">
+    <h3 class="titulo">${p.titulo}</h3>
+    <div class="imagenes-producto">
+      ${imagenUrls.length > 0
+        ? `<img src="${imagenUrls[0]}" alt="${p.titulo}" class="product-image" loading="lazy" data-images='${JSON.stringify(imagenUrls)}' />`
+        : `<img src="https://via.placeholder.com/300?text=Sin+imagen" alt="${p.titulo}" />`}
+    </div>
+    <p class="descripcion">
+      <span class="short-desc">${descripcionCorta}</span>
+      <span class="full-desc" style="display:none;">${descripcionCompleta}</span>
+      ${p.descripcion.length > 100 ? `<a href="#" class="toggle-desc">Ver más</a>` : ''}
+    </p>
+    <p><strong>Precio:</strong> $<span class="precio">${p.precio}</span></p>
+    <p><strong>Estado:</strong> ${p.estado}</p>
+    <p class="vendedor"><strong>Vendedor:</strong> ${p.vendedor}</p>
+  </div>
+  <button class="buy-button">💵 Comprar</button>
+`;
 
-      div.innerHTML = `
-        <h3 class="titulo">${p.titulo}</h3>
-        <div class="imagenes-producto">
-          ${imagenUrls.length > 0
-            ? `<img src="${imagenUrls[0]}" alt="${p.titulo}" class="product-image" loading="lazy" data-images='${JSON.stringify(imagenUrls)}' />`
-            : `<img src="https://via.placeholder.com/300?text=Sin+imagen" alt="${p.titulo}" />`}
-        </div>
-        <p class="descripcion">
-          <span class="short-desc">${descripcionCorta}</span>
-          <span class="full-desc" style="display:none;">${descripcionCompleta}</span>
-          ${p.descripcion.length > 100 ? `<a href="#" class="toggle-desc">Ver más</a>` : ''}
-        </p>
-        <p><strong>Precio:</strong> $<span class="precio">${p.precio}</span></p>
-        <p><strong>Estado:</strong> ${p.estado}</p>
-        <p><strong>Vendedor:</strong> ${p.vendedor}</p>
-        <button class="buy-button">💵 Comprar</button>
-      `;
+
 
       return div;
     });
