@@ -11,93 +11,89 @@ document.addEventListener('DOMContentLoaded', () => {
   const selectEstado = document.getElementById('select-filtro-estado');
   const inputBusqueda = document.getElementById('buscador');
   const phoneNumber = "8292308873";
+async function cargarTodosLosProductos() {
+  container.innerHTML = '<p>Cargando productos...</p>';
 
-  async function cargarTodosLosProductos() {
-    container.innerHTML = '<p>Cargando productos...</p>';
+  const { data: productos, error } = await supabase
+    .from('Productos')
+    .select('*');
 
-    const { data, error } = await supabase
-      .from('Productos')
-      .select('*');
+  if (error) {
+    container.innerHTML = `<p>Error cargando productos: ${error.message}</p>`;
+    return;
+  }
+  if (!productos || productos.length === 0) {
+    container.innerHTML = '<p>No hay productos publicados.</p>';
+    return;
+  }
 
-    if (error) {
-      container.innerHTML = `<p>Error cargando productos: ${error.message}</p>`;
-      return;
+  productos.sort(() => Math.random() - 0.5);
+
+  container.innerHTML = '';
+
+  productos.forEach(p => {
+    const estadoClass = p.estado.toLowerCase().includes('nuevo') ? 'nuevo' :
+                        p.estado.toLowerCase().includes('usado') ? 'usado' : 'otro';
+
+    const descripcionCompleta = p.descripcion || '';
+    const descripcionCorta = descripcionCompleta.length > 100
+      ? descripcionCompleta.slice(0, 100) + '...'
+      : descripcionCompleta;
+
+    let imagenUrls = [];
+    if (p.imagen_url) {
+      imagenUrls = p.imagen_url.split(',').map(url => url.trim());
     }
-    if (!data || data.length === 0) {
-      container.innerHTML = '<p>No hay productos publicados.</p>';
-      return;
-    }
 
-    // Log para verificar aleatoriedad
-    console.log("Antes de mezclar:", data.map(p => p.id));
-    data.sort(() => Math.random() - 0.5);
-    console.log("Después de mezclar:", data.map(p => p.id));
+    const phoneNumber = p.whatsapp || "8292308873";
 
-    const tarjetas = data.map(p => {
-      const estadoClass = p.estado.toLowerCase().includes('nuevo') ? 'nuevo' :
-                          p.estado.toLowerCase().includes('usado') ? 'usado' : 'otro';
+    const div = document.createElement('div');
+    div.classList.add('product-card', estadoClass);
+    div.dataset.estado = estadoClass;
 
-      const descripcionCorta = p.descripcion.length > 100 ? p.descripcion.slice(0, 100) + '...' : p.descripcion;
-      const descripcionCompleta = p.descripcion;
-
-      let imagenUrls = [];
-      if (p.imagen_url) {
-        imagenUrls = p.imagen_url.split(',').map(url => url.trim());
-      }
-
-      const div = document.createElement('div');
-      div.classList.add('product-card', estadoClass);
-      div.dataset.estado = estadoClass;
-      
 div.innerHTML = `
-  ${estadoClass === 'nuevo' || estadoClass === 'usado' ? `<span class="badge ${estadoClass}">${estadoClass.toUpperCase()}</span>` : ''}
-  <div class="contenido-producto">
-    <h3 class="titulo">${p.titulo}</h3>
-    <div class="imagenes-producto">
-      ${imagenUrls.length > 0
-        ? `<img src="${imagenUrls[0]}" alt="${p.titulo}" class="product-image" loading="lazy" data-images='${JSON.stringify(imagenUrls)}' />`
-        : `<img src="https://via.placeholder.com/300?text=Sin+imagen" alt="${p.titulo}" />`}
-    </div>
-    <p class="descripcion">
-      <span class="short-desc">${descripcionCorta}</span>
-      <span class="full-desc" style="display:none;">${descripcionCompleta}</span>
-      ${p.descripcion.length > 100 ? `<a href="#" class="toggle-desc">Ver más</a>` : ''}
-    </p>
-    <p><strong>Precio:</strong> $<span class="precio">${p.precio}</span></p>
-    <p><strong>Estado:</strong> ${p.estado}</p>
-    <p class="vendedor"><strong>Vendedor:</strong> ${p.vendedor}</p>
+  <h3 class="titulo">${p.titulo}</h3>
+  <div class="imagenes-producto">
+    ${imagenUrls.length > 0
+      ? `<img src="${imagenUrls[0]}" alt="${p.titulo}" class="product-image" loading="lazy" data-images='${JSON.stringify(imagenUrls)}' />`
+      : `<img src="https://via.placeholder.com/300?text=Sin+imagen" alt="${p.titulo}" />`}
   </div>
-  <button class="buy-button">💵 Comprar</button>
+  <p class="descripcion">
+    <span class="short-desc">${descripcionCorta}</span>
+    <span class="full-desc" style="display:none;">${descripcionCompleta}</span>
+    ${descripcionCompleta.length > 100 ? `<a href="#" class="toggle-desc">Ver más</a>` : ''}
+  </p>
+  <p><strong>Precio:</strong> $<span class="precio">${p.precio}</span></p>
+  <p><strong>Estado:</strong> ${p.estado}</p>
+  <p><strong>Vendedor:</strong> ${p.vendedor}</p>
+  <button class="buy-button" data-whatsapp="${phoneNumber}">💵 Comprar</button>
 `;
 
 
+    container.appendChild(div);
+  });
 
-      return div;
+  activarToggleDescripcion();
+  activarBotonesComprar();
+  aplicarFiltros();
+}
+
+
+
+function activarToggleDescripcion() {
+  document.querySelectorAll('.toggle-desc').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+
+      const desc = btn.closest('.descripcion');
+      desc.classList.toggle('expandida');
+
+      const isExpanded = desc.classList.contains('expandida');
+      btn.textContent = isExpanded ? 'Ver menos' : 'Ver más';
     });
+  });
+}
 
-    container.innerHTML = '';
-    tarjetas.forEach(div => container.appendChild(div));
-
-    activarToggleDescripcion();
-    activarBotonesComprar();
-    aplicarFiltros();
-  }
-
-  function activarToggleDescripcion() {
-    document.querySelectorAll('.toggle-desc').forEach(btn => {
-      btn.addEventListener('click', e => {
-        e.preventDefault();
-        const desc = btn.closest('.descripcion');
-        const shortDesc = desc.querySelector('.short-desc');
-        const fullDesc = desc.querySelector('.full-desc');
-        const isExpanded = fullDesc.style.display === 'inline' || fullDesc.style.display === 'block';
-
-        shortDesc.style.display = isExpanded ? 'inline' : 'none';
-        fullDesc.style.display = isExpanded ? 'none' : 'inline';
-        btn.textContent = isExpanded ? 'Ver más' : 'Ver menos';
-      });
-    });
-  }
 
   function activarBotonesComprar() {
     document.querySelectorAll('.buy-button').forEach(button => {
@@ -138,3 +134,4 @@ div.innerHTML = `
 
   cargarTodosLosProductos();
 });
+
