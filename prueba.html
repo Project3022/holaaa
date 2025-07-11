@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Subir Producto</title>
+  <style>
+    .preview img {
+      width: 100px;
+      margin: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Subir producto</h2>
+  <form id="product-form">
+    <input type="text" id="titulo" placeholder="Nombre del producto" required /><br />
+    <input type="text" id="descripcion" placeholder="Descripción" required /><br />
+    <input type="number" id="precio" placeholder="Precio" required /><br />
+    <select id="estado">
+      <option value="nuevo">Nuevo</option>
+      <option value="usado">Usado</option>
+    </select><br />
+    <input type="text" id="vendedor" placeholder="Vendedor" required /><br />
+    <input type="text" id="whatsapp" placeholder="Número de WhatsApp" required /><br />
+    <input type="file" id="imagen" accept="image/*" multiple required /><br />
+    <div class="preview" id="image-preview"></div><br />
+    <button type="submit">Subir producto</button>
+  </form>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+
+    const SUPABASE_URL = 'https://addmpwjxvyfpxrnzpdua.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkZG1wd2p4dnlmcHhybnpwZHVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIwNzkxMDUsImV4cCI6MjA2NzY1NTEwNX0.rouJg4RHgNZwEIN01yV-JEJxHW7idmiFBd-oYgU8MUQ';
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+    const form = document.getElementById('product-form');
+    const imagePreview = document.getElementById('image-preview');
+
+    // Vista previa de imágenes
+    document.getElementById('imagen').addEventListener('change', (e) => {
+      const files = e.target.files;
+      imagePreview.innerHTML = '';
+      for (const file of files) {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        imagePreview.appendChild(img);
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const titulo = document.getElementById('titulo').value.trim();
+      const descripcion = document.getElementById('descripcion').value.trim();
+      const precio = parseFloat(document.getElementById('precio').value);
+      const estado = document.getElementById('estado').value;
+      const vendedor = document.getElementById('vendedor').value.trim();
+      const whatsapp = document.getElementById('whatsapp').value.trim();
+      const imagenFiles = document.getElementById('imagen').files;
+
+      if (imagenFiles.length === 0) {
+        alert('Selecciona al menos una imagen.');
+        return;
+      }
+
+      // Validación de precio
+      if (isNaN(precio) || precio <= 0) {
+        alert('Por favor ingresa un precio válido.');
+        return;
+      }
+
+      // Validación de número de WhatsApp
+      const phoneRegex = /^[0-9]{10,15}$/;
+      if (!phoneRegex.test(whatsapp)) {
+        alert('Por favor ingresa un número de WhatsApp válido.');
+        return;
+      }
+
+      // Subir todas las imágenes y almacenar las URLs
+      const imagenUrls = [];
+      for (const imagenFile of imagenFiles) {
+        const filePath = `imagenes/${Date.now()}_${imagenFile.name}`;
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('productos')
+          .upload(filePath, imagenFile);
+
+        if (uploadError) {
+          alert('Error subiendo imagen: ' + uploadError.message);
+          return;
+        }
+
+        const imagen_url = `${SUPABASE_URL}/storage/v1/object/public/productos/${uploadData.path}`;
+        imagenUrls.push(imagen_url);
+      }
+
+      // Convertir las URLs a una cadena separada por comas
+      const imagenUrlsString = imagenUrls.join(',');
+
+      // Insertar el producto con la cadena de URLs
+      const { error: insertError } = await supabase
+        .from('Productos')
+        .insert([{ titulo, descripcion, precio, estado, vendedor, whatsapp, imagen_url: imagenUrlsString }]);
+
+      if (insertError) {
+        alert('Error guardando producto: ' + insertError.message);
+      } else {
+        alert('Producto subido con éxito');
+        form.reset();
+        imagePreview.innerHTML = '';  // Limpiar vista previa
+      }
+    });
+  </script>
+</body>
+</html>

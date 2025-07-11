@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MarkeShop</title>
+  <link rel="stylesheet" href="./estilos.css" />
+  <!-- SEO, Open Graph, favicon etc. aquí -->
+</head>
+<body>
+  <header class="navbar">
+    <div class="navbar-left">
+      <button id="menu-toggle" class="menu-icon">☰</button>
+    </div>
+    <div class="navbar-center">
+      <a href="./Nosotros.html"><img src="./imagen/logo.png" class="imagen" alt="Logo" /></a>
+    </div>
+  </header>
+
+  <nav id="side-menu" class="side-menu">
+    <ul>
+      <li><a href="../index.html"><img src="../salir.png" alt="Salir" class="redee" /></a></li>
+      <li><a href="./Inicio.html"><img src="./menu/1.png" alt="Todo" class="rede" /> Todo</a></li>
+      <li><a href="./Eletronico.html"><img src="./menu/2.png" alt="Electrónicos" class="rede" /> Electrónicos</a></li>
+      <li><a href="./Ropa.html"><img src="./menu/3.png" alt="Ropas" class="rede" /> Ropas</a></li>
+      <li class="active"><a href="./Accesorios.html"><img src="./menu/4.png" alt="Accesorios" class="rede" /> Accesorios</a></li>
+      <li><a href="./Otro.html"><img src="./menu/5.png" alt="Otros" class="rede" /> Otros</a></li>
+    </ul>
+  </nav>
+
+  <section class="filtros">
+    <input type="text" id="buscador" placeholder="Buscar productos..." />
+    <select id="select-filtro-estado">
+      <option value="todos">Todo</option>
+      <option value="nuevo">Nuevo</option>
+      <option value="usado">Usado</option>
+    </select>
+  </section>
+
+  <section class="container">
+    <!-- Aquí se cargarán los productos -->
+  </section>
+
+  <section class="contacto">
+    <h2>¿Quieres publicar tu producto?</h2>
+    <p>Envíanos los detalles por WhatsApp y nosotros lo publicamos por ti.</p>
+    <a href="https://api.whatsapp.com/send?phone=8292308873&text=Hola,%20quiero%20publicar%20mi%20producto%20en%20el%20marketplace" target="_blank" class="contacto-button">
+      📤 Enviar por WhatsApp
+    </a>
+  </section>
+
+  <div id="lightbox" class="lightbox" style="display:none;">
+    <span class="close-btn">&times;</span>
+    <img class="lightbox-image" src="" alt="Vista ampliada" />
+  </div>
+<div id="lightbox" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); justify-content:center; align-items:center; z-index:9999; cursor:pointer;">
+  <img class="lightbox-image" src="" style="max-width:90%; max-height:90%;" />
+  <button class="close-btn" style="position:absolute; top:20px; right:30px; font-size:30px; color:white; background:none; border:none; cursor:pointer;">&times;</button>
+</div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
