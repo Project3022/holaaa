@@ -142,22 +142,22 @@ document.addEventListener("DOMContentLoaded", () => {
     activarBotonesComprar();
     aplicarFiltros();
   }
+function activarToggleDescripcion() {
+  document.querySelectorAll('.toggle-desc').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      const desc = btn.closest('.descripcion');
+      desc.classList.toggle('expanded');
 
-  function activarToggleDescripcion() {
-    document.querySelectorAll('.toggle-desc').forEach(btn => {
-      btn.addEventListener('click', e => {
-        e.preventDefault();
-        const desc = btn.closest('.descripcion');
-        const shortDesc = desc.querySelector('.short-desc');
-        const fullDesc = desc.querySelector('.full-desc');
-        const isExpanded = fullDesc.style.display === 'inline' || fullDesc.style.display === 'block';
-
-        shortDesc.style.display = isExpanded ? 'inline' : 'none';
-        fullDesc.style.display = isExpanded ? 'none' : 'inline';
-        btn.textContent = isExpanded ? 'Ver más' : 'Ver menos';
-      });
+      if (desc.classList.contains('expanded')) {
+        btn.textContent = 'Ver menos';
+      } else {
+        btn.textContent = 'Ver más';
+      }
     });
-  }
+  });
+}
+
 
   function activarBotonesComprar() {
     document.querySelectorAll('.buy-button').forEach(button => {
